@@ -1,0 +1,164 @@
+FORMAT: 1A
+HOST: https://api.homecredit.net/
+
+# Sample Customer API
+This is a common description of my API
+
+I can use some formatting, like:
+
+**bold**
+*italics*
+
+Unordered list:
+* item one
+* item two
+* item three
+
+Ordered list:
+1. item one
+1. item two
+1. item three
+
+SOme simple table
+| column 1 | column 2 |
+| --- | --- |
+| value 1 | value 2 |
+| it doesnt need to be aligned | value 3 |
+
+# Group Customer profile
+List of API resources for manipulating user data
+
+## Customer data [/my/profile]
+Get or change customer data
+
+### Get customer data [GET]
+
++ Response 200 (application/json;charset=UTF-8)
+    + Attributes (CustomerData)
+    
+### Update customer data [PUT]
+MOdify data of logged-in customer.
+
+Only nickname and salutation can be changed.
+
++ Request (application/json;charset=UTF-8)
+Valid request
+
+    + Attributes (CustomerData)
+        + nickname: `John` (string, optional)
+        
++ Response 200 (application/json;charset=UTF-8)
+Update was successful
+
+    + Attributes (CustomerData)
+        + nickname: `John` (string, optional)
+        
++ Request (application/json;charset=UTF-8)
+Invalid request - unsupported attribute
+
+    + Attributes (CustomerData)
+        + name: `Peter Franks`
+        
++ Response 422 (application/json;charset=UTF-8)
+Error
+
+    + Attributes (Error)
+    
+## Contract detail [/my/contracts/{contractNumber}{?detail}]
+
++ Parameters
+    + contractNumber: `123` (string, required) - requested contract number
+    + detail: `HIGH` (enum, optional) - level of detail
+        + LOW
+        + MEDIUM
+        + HIGH
+        
+### Get specific contract detail [GET]
+
++ Request (application/json;charset=UTF-8)
+Existing contract
+
+    + Parameters
+        + contractNumber: `233321453`
+  
+        
++ Response 200 (application/json;charset=UTF-8)
+Existing contract
+
+    + Attributes (Contract)
+    
++ Request (application/json;charset=UTF-8)
+Existing contract with high level of detail
+
+    + Parameters
+        + contractNumber: `233321453`
+        + detail: `HIGH`
+  
+        
++ Response 200 (application/json;charset=UTF-8)
+Existing contract
+
+    + Attributes (ContractHighDetail)    
+    
++ Request (application/json;charset=UTF-8)
+Non-Existing contract
+
+    + Parameters
+        + contractNumber: `this-is-no-contract`
+    
++ Response 404 (application/json;charset=UTF-8)
+No such contract exists
+
+    + Attributes (Error)
+    
+    
+    
+# Data structures
+
+## Contract (object)
++ contractNumber: `12345` (string, required)
++ type: CEL (enum, required) - contract type
+    + CEL - close end loan
+    + REL - revolving loan
++ outstandingDebt: 1000 (number, required)    
++ One Of
+    + relAdditionalInfo (RELInfo, required) - additional information for revolving loans
+    + celAdditionalInfo (CELInfo, required) - additional information for close-end loans
+    
+## RELInfo (object)
++ presentedInterestRate: 2.15 (number, required)
++ lastPrescribedInstallment: 1000 (number, required)
+
+## CELInfo (object)
++ numberOfTerms: 10 (number, required)
+
+## ContractHighDetail (Contract)
++ serviceCodes: `AA_123, DD_444` (array[string], required)
++ lastInstallmentDate: `2018-10-22` (string, required) - last installment date
+
+## Error (object)
++ code: `EE_123` (string, required) - error code
++ message: `Unsupported operation` (string, required) - message for developer
+
+## Phone (object)
++ number: `123456` (string, required)
+
+## PhoneWIthCountryCOde (Phone)
++ countryCOde: `+420` (string, required)
+
+## Address (object)
++ street: `High street 21` (string, required)
++ city: `New York` (string, required)
++ zipCode: 12345 (number, required)
+
+## CustomerData (object)
++ name: `John Doe` (string, required) - name of the customer
++ age: 33 (number, required) - age of the customer
++ salutation: `Mr.` (string, optional) - salutation
++ nickname: `Johnnie` (string, optional) - customer nick name
++ addresses (array[Address], fixed-type, required) - customer addresses
++ consentSigned: true (boolean, required)
++ initialTransactionTYpe: POS (enum, required) - initial transaction type
+    + POS - initial transaction on POS
+    + ONLINE - initial transaction online
++ phones (array[PhoneWIthCountryCOde], fixed-type, required) - user phones
